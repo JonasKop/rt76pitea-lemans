@@ -75,7 +75,7 @@ export default function Home() {
           >
             <span className="relative h-9 w-12 overflow-hidden rounded-sm border border-[#d8ad62]/30 bg-[#fff6df] p-1 shadow-lg shadow-black/20 sm:h-11 sm:w-14">
               <Image
-                src="/images/official/rt76-pitea.jpg"
+                src="/images/official/rt76-pitea.webp"
                 alt=""
                 fill
                 sizes="56px"
@@ -100,7 +100,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2 border-r border-[#d8ad62]/20 pr-3 lg:flex">
               <Image
-                src="/images/official/round-table-sweden.png"
+                src="/images/official/round-table-sweden.webp"
                 alt="Round Table Sweden"
                 width={34}
                 height={34}
@@ -126,7 +126,7 @@ export default function Home() {
 
       <section className="relative min-h-[92svh] border-b border-[#d8ad62]/20">
         <Image
-          src="/images/lemans-pub-hero.png"
+          src="/images/lemans-pub-hero.webp"
           alt="Mörk pubmiljö med ölglas, racingdetaljer och guldtoner"
           fill
           priority
@@ -177,7 +177,7 @@ export default function Home() {
               <div className="absolute inset-8 rounded-full bg-[#d8ad62]/20 blur-3xl" />
               <div className="relative overflow-hidden rounded-md border border-[#d8ad62]/28 bg-[#050403]/72 p-4 shadow-2xl shadow-black/50">
                 <Image
-                  src="/images/official/lemans-badge.jpg"
+                  src="/images/official/lemans-badge.webp"
                   alt="Lemans 24-ölars RT76 Piteå"
                   width={1324}
                   height={1182}
@@ -223,14 +223,14 @@ export default function Home() {
             </p>
             <div className="flex items-center gap-3 rounded-md border border-[#d8ad62]/24 bg-[#090806]/44 p-3">
               <Image
-                src="/images/official/rt76-pitea.jpg"
+                src="/images/official/rt76-pitea.webp"
                 alt="RT76 Piteå"
                 width={116}
                 height={89}
                 className="h-16 w-24 rounded-sm bg-[#fff6df] object-contain p-1"
               />
               <Image
-                src="/images/official/round-table-sweden.png"
+                src="/images/official/round-table-sweden.webp"
                 alt="Round Table Sweden"
                 width={76}
                 height={74}
@@ -519,7 +519,7 @@ export default function Home() {
       <section className="px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
           <Image
-            src="/images/official/lemans-badge.jpg"
+            src="/images/official/lemans-badge.webp"
             alt="Lemans 24-ölars RT76 Piteå"
             width={210}
             height={188}
@@ -561,14 +561,14 @@ export default function Home() {
             </span>
             <div className="flex items-center gap-4">
               <Image
-                src="/images/official/rt76-pitea.jpg"
+                src="/images/official/rt76-pitea.webp"
                 alt="RT76 Piteå"
                 width={132}
                 height={102}
                 className="h-14 w-20 rounded-sm bg-[#fff6df] object-contain p-1"
               />
               <Image
-                src="/images/official/round-table-sweden.png"
+                src="/images/official/round-table-sweden.webp"
                 alt="Round Table Sweden"
                 width={68}
                 height={66}
