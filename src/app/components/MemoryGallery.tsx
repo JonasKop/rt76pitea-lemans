@@ -55,9 +55,9 @@ export function MemoryGallery() {
   const videoScrollRef = useRef<HTMLDivElement>(null);
   const [maxLoadedIndex, setMaxLoadedIndex] = useState(2);
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const getCarouselMetrics = useCallback((el: HTMLDivElement | null) => {
-
     if (!el) {
       return null;
     }
@@ -122,9 +122,16 @@ export function MemoryGallery() {
 
   const closeModal = useCallback(() => {
     setActiveMedia(null);
+    setModalLoading(false);
+  }, []);
+
+  const openMedia = useCallback((media: ActiveMedia) => {
+    setModalLoading(true);
+    setActiveMedia(media);
   }, []);
 
   const showNextMedia = useCallback(() => {
+    setModalLoading(true);
     setActiveMedia((current) => {
       if (!current) {
         return current;
@@ -141,6 +148,7 @@ export function MemoryGallery() {
   }, []);
 
   const showPreviousMedia = useCallback(() => {
+    setModalLoading(true);
     setActiveMedia((current) => {
       if (!current) {
         return current;
@@ -249,7 +257,7 @@ export function MemoryGallery() {
             type="button"
             aria-label="Visa föregående bilder"
             onClick={() => scrollGallery("prev")}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
           >
             <ChevronLeft size={20} aria-hidden="true" />
           </button>
@@ -257,7 +265,7 @@ export function MemoryGallery() {
             type="button"
             aria-label="Visa nästa bilder"
             onClick={() => scrollGallery("next")}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
           >
             <ChevronRight size={20} aria-hidden="true" />
           </button>
@@ -275,7 +283,7 @@ export function MemoryGallery() {
             type="button"
             data-carousel-card
             aria-label={`Visa arkivbild ${String(index + 1).padStart(2, "0")} större`}
-            onClick={() => setActiveMedia({ index, type: "image" })}
+            onClick={() => openMedia({ index, type: "image" })}
             className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
           >
             <div className="relative aspect-[4/3] bg-[#090806]">
@@ -322,7 +330,7 @@ export function MemoryGallery() {
               type="button"
               aria-label="Visa föregående filmklipp"
               onClick={() => scrollVideos("prev")}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
             >
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
@@ -330,7 +338,7 @@ export function MemoryGallery() {
               type="button"
               aria-label="Visa nästa filmklipp"
               onClick={() => scrollVideos("next")}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
             >
               <ChevronRight size={20} aria-hidden="true" />
             </button>
@@ -347,7 +355,7 @@ export function MemoryGallery() {
               type="button"
               data-carousel-card
               aria-label={`Visa ${item.title.toLowerCase()} större`}
-              onClick={() => setActiveMedia({ index, type: "video" })}
+              onClick={() => openMedia({ index, type: "video" })}
               className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
             >
               <div className="relative aspect-video bg-[#090806]">
@@ -377,7 +385,9 @@ export function MemoryGallery() {
       {activeMedia ? (
         <MediaModal
           activeMedia={activeMedia}
+          isLoading={modalLoading}
           onClose={closeModal}
+          onLoaded={() => setModalLoading(false)}
           onNext={showNextMedia}
           onPrevious={showPreviousMedia}
         />
@@ -388,12 +398,16 @@ export function MemoryGallery() {
 
 function MediaModal({
   activeMedia,
+  isLoading,
   onClose,
+  onLoaded,
   onNext,
   onPrevious,
 }: {
   activeMedia: ActiveMedia;
+  isLoading: boolean;
   onClose: () => void;
+  onLoaded: () => void;
   onNext: () => void;
   onPrevious: () => void;
 }) {
@@ -428,28 +442,47 @@ function MediaModal({
             type="button"
             aria-label="Stäng"
             onClick={onClose}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
           >
             <X size={21} aria-hidden="true" />
           </button>
         </div>
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#090806] shadow-2xl shadow-black/60">
+          {isLoading ? (
+            <div className="absolute inset-0 z-10 grid place-items-center bg-[#090806]">
+              <div className="text-center">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-[#d8ad62]">
+                  Laddar
+                </p>
+                <div className="mx-auto mt-4 h-1 w-24 overflow-hidden rounded-full bg-[#d8ad62]/18">
+                  <div className="h-full w-1/2 animate-pulse rounded-full bg-[#d8ad62]" />
+                </div>
+              </div>
+            </div>
+          ) : null}
           {isImage ? (
             <Image
+              key={(item as GalleryItem).src}
               src={(item as GalleryItem).src}
               alt={(item as GalleryItem).alt}
               fill
               sizes="100vw"
-              className="object-contain"
+              className={`object-contain transition-opacity duration-150 ${
+                isLoading ? "opacity-0" : "opacity-100"
+              }`}
+              onLoad={onLoaded}
               priority
             />
           ) : (
             <video
               key={(item as VideoItem).src}
               autoPlay
-              className="max-h-full max-w-full bg-[#090806] object-contain"
+              className={`max-h-full max-w-full bg-[#090806] object-contain transition-opacity duration-150 ${
+                isLoading ? "opacity-0" : "opacity-100"
+              }`}
               controls
+              onLoadedData={onLoaded}
               playsInline
               preload="metadata"
               poster={(item as VideoItem).poster}
@@ -464,7 +497,7 @@ function MediaModal({
             type="button"
             aria-label="Visa föregående"
             onClick={onPrevious}
-            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
           >
             <ChevronLeft size={25} aria-hidden="true" />
           </button>
@@ -472,7 +505,7 @@ function MediaModal({
             type="button"
             aria-label="Visa nästa"
             onClick={onNext}
-            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
           >
             <ChevronRight size={25} aria-hidden="true" />
           </button>
