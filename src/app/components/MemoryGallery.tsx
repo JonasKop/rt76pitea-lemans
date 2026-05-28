@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Search,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -8,6 +14,22 @@ type GalleryItem = {
   src: string;
   alt: string;
 };
+
+type VideoItem = {
+  src: string;
+  poster: string;
+  title: string;
+};
+
+type ActiveMedia =
+  | {
+      index: number;
+      type: "image";
+    }
+  | {
+      index: number;
+      type: "video";
+    };
 
 const galleryImages: GalleryItem[] = Array.from({ length: 44 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0");
@@ -18,18 +40,29 @@ const galleryImages: GalleryItem[] = Array.from({ length: 44 }, (_, index) => {
   };
 });
 
+const archiveVideos: VideoItem[] = Array.from({ length: 5 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0");
+
+  return {
+    src: `/videos/lemans-archive-video-${number}.mp4`,
+    poster: `/images/video-posters/lemans-archive-video-${number}.webp`,
+    title: `Filmklipp ${number}`,
+  };
+});
+
 export function MemoryGallery() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const videoScrollRef = useRef<HTMLDivElement>(null);
   const [maxLoadedIndex, setMaxLoadedIndex] = useState(2);
+  const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
 
-  const getGalleryMetrics = useCallback(() => {
-    const el = scrollRef.current;
+  const getCarouselMetrics = useCallback((el: HTMLDivElement | null) => {
 
     if (!el) {
       return null;
     }
 
-    const firstCard = el.querySelector<HTMLElement>("article");
+    const firstCard = el.querySelector<HTMLElement>("[data-carousel-card]");
 
     if (!firstCard) {
       return null;
@@ -41,6 +74,16 @@ export function MemoryGallery() {
 
     return { cardStep, el, visibleCards };
   }, []);
+
+  const getGalleryMetrics = useCallback(
+    () => getCarouselMetrics(scrollRef.current),
+    [getCarouselMetrics],
+  );
+
+  const getVideoMetrics = useCallback(
+    () => getCarouselMetrics(videoScrollRef.current),
+    [getCarouselMetrics],
+  );
 
   const loadVisibleImages = useCallback(
     (startIndex: number) => {
@@ -76,6 +119,70 @@ export function MemoryGallery() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, [getGalleryMetrics, loadVisibleImages]);
+
+  const closeModal = useCallback(() => {
+    setActiveMedia(null);
+  }, []);
+
+  const showNextMedia = useCallback(() => {
+    setActiveMedia((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const count =
+        current.type === "image" ? galleryImages.length : archiveVideos.length;
+
+      return {
+        ...current,
+        index: (current.index + 1) % count,
+      };
+    });
+  }, []);
+
+  const showPreviousMedia = useCallback(() => {
+    setActiveMedia((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const count =
+        current.type === "image" ? galleryImages.length : archiveVideos.length;
+
+      return {
+        ...current,
+        index: (current.index - 1 + count) % count,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!activeMedia) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+
+      if (event.key === "ArrowRight") {
+        showNextMedia();
+      }
+
+      if (event.key === "ArrowLeft") {
+        showPreviousMedia();
+      }
+    }
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeMedia, closeModal, showNextMedia, showPreviousMedia]);
 
   function handleScroll() {
     const metrics = getGalleryMetrics();
@@ -115,6 +222,22 @@ export function MemoryGallery() {
     });
   }
 
+  function scrollVideos(direction: "prev" | "next") {
+    const metrics = getVideoMetrics();
+
+    if (!metrics) {
+      return;
+    }
+
+    const { cardStep, el, visibleCards } = metrics;
+    const scrollAmount = visibleCards * cardStep;
+
+    el.scrollBy({
+      left: direction === "next" ? scrollAmount : -scrollAmount,
+      behavior: "smooth",
+    });
+  }
+
   return (
     <div className="relative">
       <div className="mb-5 flex items-center justify-between gap-4">
@@ -147,9 +270,13 @@ export function MemoryGallery() {
         className="gallery-scroll flex snap-x gap-4 overflow-x-auto pb-4"
       >
         {galleryImages.map((item, index) => (
-          <article
+          <button
             key={item.src}
-            className="group w-full shrink-0 snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] shadow-2xl shadow-black/30 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
+            type="button"
+            data-carousel-card
+            aria-label={`Visa arkivbild ${String(index + 1).padStart(2, "0")} större`}
+            onClick={() => setActiveMedia({ index, type: "image" })}
+            className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
           >
             <div className="relative aspect-[4/3] bg-[#090806]">
               {index <= maxLoadedIndex ? (
@@ -164,6 +291,11 @@ export function MemoryGallery() {
               ) : (
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(216,173,98,0.14),transparent_30%),linear-gradient(135deg,rgba(17,23,15,1),rgba(9,8,6,1))]" />
               )}
+              <div className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100 group-focus-visible:bg-black/30 group-focus-visible:opacity-100">
+                <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#d8ad62]/60 bg-[#090806]/78 text-[#d8ad62] shadow-2xl shadow-black/40 backdrop-blur">
+                  <Search size={24} aria-hidden="true" />
+                </span>
+              </div>
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-4 left-4 rounded-sm border border-[#d8ad62]/30 bg-[#090806]/72 px-3 py-2 backdrop-blur">
                 <span className="text-xs font-black uppercase tracking-[0.22em] text-[#d8ad62]">
@@ -171,8 +303,180 @@ export function MemoryGallery() {
                 </span>
               </div>
             </div>
-          </article>
+          </button>
         ))}
+      </div>
+
+      <div className="mt-10 border-t border-[#d8ad62]/16 pt-8">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#f8efd8]/58">
+              5 filmklipp
+            </p>
+            <h3 className="mt-2 font-serif text-3xl font-bold text-[#fff6df]">
+              Rörligt från tidigare varv.
+            </h3>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              aria-label="Visa föregående filmklipp"
+              onClick={() => scrollVideos("prev")}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            >
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Visa nästa filmklipp"
+              onClick={() => scrollVideos("next")}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            >
+              <ChevronRight size={20} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={videoScrollRef}
+          className="gallery-scroll flex snap-x gap-4 overflow-x-auto pb-4"
+        >
+          {archiveVideos.map((item, index) => (
+            <button
+              key={item.src}
+              type="button"
+              data-carousel-card
+              aria-label={`Visa ${item.title.toLowerCase()} större`}
+              onClick={() => setActiveMedia({ index, type: "video" })}
+              className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
+            >
+              <div className="relative aspect-video bg-[#090806]">
+                <Image
+                  src={item.poster}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100 group-focus-visible:bg-black/30 group-focus-visible:opacity-100">
+                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#d8ad62]/60 bg-[#090806]/78 text-[#d8ad62] shadow-2xl shadow-black/40 backdrop-blur">
+                    <Maximize2 size={23} aria-hidden="true" />
+                  </span>
+                </div>
+              </div>
+              <div className="border-t border-[#d8ad62]/16 px-4 py-3">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#d8ad62]">
+                  {item.title}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeMedia ? (
+        <MediaModal
+          activeMedia={activeMedia}
+          onClose={closeModal}
+          onNext={showNextMedia}
+          onPrevious={showPreviousMedia}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function MediaModal({
+  activeMedia,
+  onClose,
+  onNext,
+  onPrevious,
+}: {
+  activeMedia: ActiveMedia;
+  onClose: () => void;
+  onNext: () => void;
+  onPrevious: () => void;
+}) {
+  const isImage = activeMedia.type === "image";
+  const item = isImage
+    ? galleryImages[activeMedia.index]
+    : archiveVideos[activeMedia.index];
+  const count = isImage ? galleryImages.length : archiveVideos.length;
+  const label = isImage
+    ? `Arkivbild ${String(activeMedia.index + 1).padStart(2, "0")}`
+    : archiveVideos[activeMedia.index].title;
+
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/88 p-4 backdrop-blur-md sm:p-6"
+      role="dialog"
+    >
+      <button
+        type="button"
+        aria-label="Stäng genom att klicka utanför"
+        onClick={onClose}
+        className="absolute inset-0 cursor-zoom-out"
+      />
+
+      <div className="relative z-10 flex h-full max-h-[92vh] w-full max-w-6xl flex-col">
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-[#d8ad62]">
+            {label} / {count}
+          </p>
+          <button
+            type="button"
+            aria-label="Stäng"
+            onClick={onClose}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+          >
+            <X size={21} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#090806] shadow-2xl shadow-black/60">
+          {isImage ? (
+            <Image
+              src={(item as GalleryItem).src}
+              alt={(item as GalleryItem).alt}
+              fill
+              sizes="100vw"
+              className="object-contain"
+              priority
+            />
+          ) : (
+            <video
+              key={(item as VideoItem).src}
+              autoPlay
+              className="max-h-full max-w-full bg-[#090806] object-contain"
+              controls
+              playsInline
+              preload="metadata"
+              poster={(item as VideoItem).poster}
+            >
+              <source src={(item as VideoItem).src} type="video/mp4" />
+            </video>
+          )}
+        </div>
+
+        <div className="pointer-events-none absolute inset-y-14 left-0 right-0 z-20 flex items-center justify-between px-2 sm:px-4">
+          <button
+            type="button"
+            aria-label="Visa föregående"
+            onClick={onPrevious}
+            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+          >
+            <ChevronLeft size={25} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Visa nästa"
+            onClick={onNext}
+            className="pointer-events-auto relative z-30 inline-flex h-12 w-12 items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f]/86 text-[#d8ad62] shadow-xl shadow-black/40 transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+          >
+            <ChevronRight size={25} aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -45,6 +45,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Official assets are stored as optimized WebP files in `public/images/official/`.
 - Preserve the generated hero asset at `public/images/lemans-pub-hero.webp` unless replacing it with a clearly better event asset.
 - Gallery/event archive photos should live in `public/images/gallery/` as optimized WebP files with stable names like `lemans-archive-01.webp`. Render them with `next/image`, responsive `sizes`, and lazy loading.
+- Archive videos should live in `public/videos/` as stable MP4 files with matching WebP poster images in `public/images/video-posters/`. Render videos below the photo gallery with `preload="metadata"`, `controls`, `playsInline`, and no autoplay.
 - Do not use raw screenshots as large standalone website visuals; they look like pasted documents and break the premium event tone. Convert their information into designed, accessible text blocks instead.
 
 ## UX Requirements
