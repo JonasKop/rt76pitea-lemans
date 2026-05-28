@@ -1,0 +1,64 @@
+@import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
+
+:root {
+  --background: #090806;
+  --foreground: #f8efd8;
+  --gold: #d8ad62;
+  --brass: #9d6d2f;
+  --mahogany: #2a140d;
+  --green: #13221a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(216, 173, 98, 0.32);
+  color: #fff7e6;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.gold-text {
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(216, 173, 98, 0.18);
+}
+
+.pub-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 248, 228, 0.08), rgba(255, 248, 228, 0.02)),
+    rgba(12, 10, 8, 0.78);
+  border: 1px solid rgba(216, 173, 98, 0.24);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+}
+
+.leaflet-container {
+  background: #13221a;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+.leaflet-control-attribution,
+.leaflet-control-zoom a,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: rgba(15, 13, 10, 0.92);
+  color: #f8efd8;
+}
+
+.leaflet-control-zoom a {
+  border-color: rgba(216, 173, 98, 0.28);
+}
