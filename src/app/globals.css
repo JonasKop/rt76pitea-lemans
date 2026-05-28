@@ -33,6 +33,10 @@ html {
   scroll-behavior: smooth;
 }
 
+.anchor-section {
+  scroll-margin-top: 40px;
+}
+
 .gold-text {
   color: var(--gold);
   text-shadow: 0 0 24px rgba(216, 173, 98, 0.18);
@@ -61,4 +65,22 @@ html {
 
 .leaflet-control-zoom a {
   border-color: rgba(216, 173, 98, 0.28);
+}
+
+.gallery-scroll {
+  scrollbar-color: rgba(216, 173, 98, 0.72) rgba(248, 239, 216, 0.08);
+  scrollbar-width: thin;
+}
+
+.gallery-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.gallery-scroll::-webkit-scrollbar-track {
+  background: rgba(248, 239, 216, 0.08);
+}
+
+.gallery-scroll::-webkit-scrollbar-thumb {
+  background: rgba(216, 173, 98, 0.72);
+  border-radius: 999px;
 }

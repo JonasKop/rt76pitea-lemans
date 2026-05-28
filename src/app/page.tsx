@@ -7,12 +7,15 @@ import {
   ExternalLink,
   Mail,
   MapPin,
+  Sparkles,
   ShieldCheck,
   Trophy,
   UsersRound,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { EventMap } from "./components/EventMap";
+import { MemoryGallery } from "./components/MemoryGallery";
 
 const registrationUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSci596qJ1BtjNeecqEjl-AekyKJiq3F-Q1NWBm0ccW-Ip9MAQ/viewform";
@@ -65,12 +68,21 @@ export default function Home() {
     <main className="min-h-screen bg-[#090806] text-[#f8efd8]">
       <header className="sticky top-0 z-50 border-b border-[#d8ad62]/16 bg-[#090806]/82 px-4 py-4 shadow-[0_12px_44px_rgba(0,0,0,0.28)] backdrop-blur-md sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <a
-            href="#top"
-            className="font-serif text-xl font-bold tracking-[0.18em] text-[#d8ad62] sm:text-2xl"
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+            aria-label="Till toppen"
           >
-            RT76
-          </a>
+            <span className="relative h-9 w-12 overflow-hidden rounded-sm border border-[#d8ad62]/30 bg-[#fff6df] p-1 shadow-lg shadow-black/20 sm:h-11 sm:w-14">
+              <Image
+                src="/images/official/rt76-pitea.jpg"
+                alt=""
+                fill
+                sizes="56px"
+                className="object-contain p-1"
+              />
+            </span>
+          </Link>
           <nav className="hidden items-center gap-8 text-sm font-semibold text-[#f8efd8]/78 md:flex">
             <a className="transition hover:text-[#d8ad62]" href="#schema">
               Schema
@@ -78,20 +90,37 @@ export default function Home() {
             <a className="transition hover:text-[#d8ad62]" href="#praktiskt">
               Praktiskt
             </a>
+            <a className="transition hover:text-[#d8ad62]" href="#lotteri">
+              Lotteri
+            </a>
             <a className="transition hover:text-[#d8ad62]" href="#plats">
               Plats
             </a>
           </nav>
-          <a
-            href={registrationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-sm border border-[#d8ad62]/50 bg-[#d8ad62] px-2.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#120b05] transition hover:bg-[#f1c979] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm sm:tracking-[0.12em]"
-          >
-            <span className="sm:hidden">Anmäl</span>
-            <span className="hidden sm:inline">Anmäl dig</span>
-            <ExternalLink size={14} aria-hidden="true" />
-          </a>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 border-r border-[#d8ad62]/20 pr-3 lg:flex">
+              <Image
+                src="/images/official/round-table-sweden.png"
+                alt="Round Table Sweden"
+                width={34}
+                height={34}
+                className="h-8 w-8 object-contain"
+              />
+              <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#f8efd8]/62">
+                Sverige
+              </span>
+            </div>
+            <a
+              href={registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-sm border border-[#d8ad62]/50 bg-[#d8ad62] px-2.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#120b05] transition hover:bg-[#f1c979] sm:h-11 sm:gap-2 sm:px-4 sm:text-sm sm:tracking-[0.12em]"
+            >
+              <span className="sm:hidden">Anmäl</span>
+              <span className="hidden sm:inline">Anmäl dig</span>
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </header>
 
@@ -108,7 +137,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_26%,rgba(216,173,98,0.16),transparent_31%),linear-gradient(180deg,rgba(9,8,6,0.05),rgba(9,8,6,0.88))]" />
 
         <div className="relative mx-auto flex min-h-[92svh] w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
-          <div id="top" className="flex flex-1 items-center py-16 sm:py-20">
+          <div
+            id="top"
+            className="grid flex-1 items-center gap-10 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.55fr)]"
+          >
             <div className="w-full max-w-3xl">
               <p className="mb-5 inline-flex max-w-full items-center gap-2 border-y border-[#d8ad62]/35 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#d8ad62] sm:text-xs sm:tracking-[0.28em]">
                 <ShieldCheck size={15} aria-hidden="true" />
@@ -120,7 +152,7 @@ export default function Home() {
               </h1>
               <p className="mt-7 max-w-[21rem] text-lg leading-8 text-[#f8efd8]/84 sm:max-w-2xl sm:text-xl">
                 Två dagar i Piteå där gokartnerv, bastuånga och gyllene dryck
-                förenas till en RT76-klassiker.
+                förenas till en RTS-klassiker.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
@@ -140,6 +172,20 @@ export default function Home() {
                 </a>
               </div>
             </div>
+
+            <div className="relative mx-auto hidden w-full max-w-sm lg:block">
+              <div className="absolute inset-8 rounded-full bg-[#d8ad62]/20 blur-3xl" />
+              <div className="relative overflow-hidden rounded-md border border-[#d8ad62]/28 bg-[#050403]/72 p-4 shadow-2xl shadow-black/50">
+                <Image
+                  src="/images/official/lemans-badge.jpg"
+                  alt="Lemans 24-ölars RT76 Piteå"
+                  width={1324}
+                  height={1182}
+                  priority
+                  className="h-auto w-full rounded-sm object-contain"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3 pb-7 sm:grid-cols-3">
@@ -156,26 +202,46 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-[#11170f] px-5 py-14 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+      <section
+        id="lotteri"
+        className="anchor-section bg-[#11170f] px-5 py-14 sm:px-8 lg:px-10"
+      >
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
               Klassikerstatus
             </p>
             <h2 className="mt-3 font-serif text-4xl font-bold text-[#fff6df] sm:text-5xl">
-              Inte ett vanligt evenemang. Ett långlopp i gott omdöme.
+              En RTS-klassiker med Piteå som hemmabana.
             </h2>
           </div>
-          <p className="text-lg leading-8 text-[#f8efd8]/80">
-            Folk kommer från när och fjärran för att uppleva Piteås mest
-            självklara kombination: Round Table-brödraskap, gokart, öl, bastu
-            och den sortens ceremoniella allvar som bara fungerar när alla
-            förstår skämtet.
-          </p>
+          <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
+            <p className="text-lg leading-8 text-[#f8efd8]/80">
+              Lemans 24 Ölars har vuxit till en självklar samlingspunkt för
+              bröder och gäster från när och fjärran. En helg där tävling,
+              gemenskap och norrländsk gästfrihet får ta plats på riktigt.
+            </p>
+            <div className="flex items-center gap-3 rounded-md border border-[#d8ad62]/24 bg-[#090806]/44 p-3">
+              <Image
+                src="/images/official/rt76-pitea.jpg"
+                alt="RT76 Piteå"
+                width={116}
+                height={89}
+                className="h-16 w-24 rounded-sm bg-[#fff6df] object-contain p-1"
+              />
+              <Image
+                src="/images/official/round-table-sweden.png"
+                alt="Round Table Sweden"
+                width={76}
+                height={74}
+                className="h-16 w-16 object-contain"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="schema" className="px-5 py-16 sm:px-8 lg:px-10">
+      <section id="schema" className="anchor-section px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -194,7 +260,10 @@ export default function Home() {
 
           <div className="grid gap-4 lg:grid-cols-4">
             {schedule.map((item) => (
-              <article key={`${item.day}-${item.time}`} className="pub-panel rounded-md p-5">
+              <article
+                key={`${item.day}-${item.time}`}
+                className="pub-panel rounded-md p-5"
+              >
                 <div className="mb-7 flex items-center justify-between gap-3">
                   <span className="text-sm font-black uppercase tracking-[0.2em] text-[#d8ad62]">
                     {item.day}
@@ -214,7 +283,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="praktiskt" className="bg-[#24130d] px-5 py-16 sm:px-8 lg:px-10">
+      <section
+        id="praktiskt"
+        className="anchor-section bg-[#24130d] px-5 py-16 sm:px-8 lg:px-10"
+      >
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
@@ -265,7 +337,28 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="plats" className="px-5 py-16 sm:px-8 lg:px-10">
+      <section className="bg-[#11170f] px-5 py-14 sm:px-8 lg:px-10">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
+              Lotteri
+            </p>
+            <h2 className="mt-3 font-serif text-4xl font-bold text-[#fff6df] sm:text-5xl">
+              Maxat lotteri på plats.
+            </h2>
+          </div>
+          <div className="pub-panel rounded-md p-6 sm:p-7">
+            <Sparkles className="mb-4 text-[#d8ad62]" size={26} />
+            <p className="max-w-3xl text-lg leading-8 text-[#f8efd8]/78">
+              Under helgen kör vi ett ordentligt lotteri med priser värdiga en
+              RTS-klassiker. Mer detaljer kommer, men räkna med att det blir
+              värt att hålla sig nära dragningen.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="plats" className="anchor-section px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-stretch">
           <div className="pub-panel rounded-md p-6 sm:p-8">
             <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
@@ -317,6 +410,23 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="bg-[#0f0d0a] px-5 py-16 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
+                Minnesbanken
+              </p>
+              <h2 className="mt-3 font-serif text-4xl font-bold text-[#fff6df] sm:text-5xl">
+                Bilder från tidigare varv.
+              </h2>
+            </div>
+          </div>
+
+          <MemoryGallery />
+        </div>
+      </section>
+
       <section className="bg-[#10100d] px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <div>
@@ -327,10 +437,10 @@ export default function Home() {
               En helg för bröder, gäster och gokartben.
             </h2>
             <p className="mt-5 text-lg leading-8 text-[#f8efd8]/76">
-              Fredag kväll öppnar vi dörrarna. Lördag samlar vi gänget vid
-              havet för brunch, RT-möte, buss till banan, racing, mat, bastu
-              och vidare färd mot stan. Det är enkelt, socialt och exakt så
-              seriöst som en klassiker ska vara.
+              Fredag kväll öppnar vi dörrarna. Lördag samlar vi gänget vid havet
+              för brunch, RT-möte, buss till banan, racing, mat, bastu och
+              vidare färd mot stan. Det är enkelt, socialt och exakt så seriöst
+              som en klassiker ska vara.
             </p>
           </div>
 
@@ -408,6 +518,13 @@ export default function Home() {
 
       <section className="px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+          <Image
+            src="/images/official/lemans-badge.jpg"
+            alt="Lemans 24-ölars RT76 Piteå"
+            width={210}
+            height={188}
+            className="mb-7 h-auto w-40 rounded-md border border-[#d8ad62]/28 bg-black/40 p-2 shadow-2xl shadow-black/35 sm:w-52"
+          />
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#d8ad62]">
             Välkommen till Piteå
           </p>
@@ -437,6 +554,27 @@ export default function Home() {
               Facebookgruppen
               <ExternalLink size={17} aria-hidden="true" />
             </a>
+          </div>
+          <div className="mt-12 flex flex-col items-center gap-4 border-t border-[#d8ad62]/20 pt-8 sm:flex-row">
+            <span className="text-xs font-bold uppercase tracking-[0.22em] text-[#f8efd8]/58">
+              Arrangeras av
+            </span>
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/official/rt76-pitea.jpg"
+                alt="RT76 Piteå"
+                width={132}
+                height={102}
+                className="h-14 w-20 rounded-sm bg-[#fff6df] object-contain p-1"
+              />
+              <Image
+                src="/images/official/round-table-sweden.png"
+                alt="Round Table Sweden"
+                width={68}
+                height={66}
+                className="h-14 w-14 object-contain"
+              />
+            </div>
           </div>
         </div>
       </section>
