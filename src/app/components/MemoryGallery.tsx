@@ -31,6 +31,11 @@ type ActiveMedia =
       type: "video";
     };
 
+type CarouselControls = {
+  canNext: boolean;
+  canPrevious: boolean;
+};
+
 const galleryImages: GalleryItem[] = Array.from({ length: 44 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0");
 
@@ -53,8 +58,15 @@ const archiveVideos: VideoItem[] = Array.from({ length: 5 }, (_, index) => {
 export function MemoryGallery() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoScrollRef = useRef<HTMLDivElement>(null);
-  const [maxLoadedIndex, setMaxLoadedIndex] = useState(2);
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
+  const [galleryControls, setGalleryControls] = useState<CarouselControls>({
+    canNext: true,
+    canPrevious: false,
+  });
+  const [videoControls, setVideoControls] = useState<CarouselControls>({
+    canNext: true,
+    canPrevious: false,
+  });
   const [modalLoading, setModalLoading] = useState(false);
 
   const getCarouselMetrics = useCallback((el: HTMLDivElement | null) => {
@@ -75,6 +87,23 @@ export function MemoryGallery() {
     return { cardStep, el, visibleCards };
   }, []);
 
+  const getCarouselControls = useCallback((el: HTMLDivElement | null) => {
+    if (!el) {
+      return {
+        canNext: false,
+        canPrevious: false,
+      };
+    }
+
+    const scrollableDistance = el.scrollWidth - el.clientWidth;
+    const scrollLeft = Math.max(0, el.scrollLeft);
+
+    return {
+      canNext: scrollLeft < scrollableDistance - 2,
+      canPrevious: scrollLeft > 2,
+    };
+  }, []);
+
   const getGalleryMetrics = useCallback(
     () => getCarouselMetrics(scrollRef.current),
     [getCarouselMetrics],
@@ -85,40 +114,29 @@ export function MemoryGallery() {
     [getCarouselMetrics],
   );
 
-  const loadVisibleImages = useCallback(
-    (startIndex: number) => {
-      const metrics = getGalleryMetrics();
-      const visibleCards = metrics?.visibleCards ?? 1;
-      const endIndex = Math.min(
-        galleryImages.length - 1,
-        startIndex + visibleCards - 1,
-      );
+  const updateGalleryControls = useCallback(() => {
+    setGalleryControls(getCarouselControls(scrollRef.current));
+  }, [getCarouselControls]);
 
-      setMaxLoadedIndex((current) => Math.max(current, endIndex));
-    },
-    [getGalleryMetrics],
-  );
+  const updateVideoControls = useCallback(() => {
+    setVideoControls(getCarouselControls(videoScrollRef.current));
+  }, [getCarouselControls]);
 
   useEffect(() => {
     function handleResize() {
-      const metrics = getGalleryMetrics();
-
-      if (!metrics) {
-        return;
-      }
-
-      const currentIndex = Math.max(
-        0,
-        Math.round(metrics.el.scrollLeft / metrics.cardStep),
-      );
-
-      loadVisibleImages(currentIndex);
+      updateGalleryControls();
+      updateVideoControls();
     }
 
     window.addEventListener("resize", handleResize);
 
+    window.requestAnimationFrame(() => {
+      updateGalleryControls();
+      updateVideoControls();
+    });
+
     return () => window.removeEventListener("resize", handleResize);
-  }, [getGalleryMetrics, loadVisibleImages]);
+  }, [updateGalleryControls, updateVideoControls]);
 
   const closeModal = useCallback(() => {
     setActiveMedia(null);
@@ -193,18 +211,11 @@ export function MemoryGallery() {
   }, [activeMedia, closeModal, showNextMedia, showPreviousMedia]);
 
   function handleScroll() {
-    const metrics = getGalleryMetrics();
+    updateGalleryControls();
+  }
 
-    if (!metrics) {
-      return;
-    }
-
-    const currentIndex = Math.max(
-      0,
-      Math.round(metrics.el.scrollLeft / metrics.cardStep),
-    );
-
-    loadVisibleImages(currentIndex);
+  function handleVideoScroll() {
+    updateVideoControls();
   }
 
   function scrollGallery(direction: "prev" | "next") {
@@ -216,18 +227,13 @@ export function MemoryGallery() {
 
     const { cardStep, el, visibleCards } = metrics;
     const scrollAmount = visibleCards * cardStep;
-    const currentIndex = Math.max(0, Math.round(el.scrollLeft / cardStep));
-    const targetIndex =
-      direction === "next"
-        ? Math.min(galleryImages.length - 1, currentIndex + visibleCards)
-        : Math.max(0, currentIndex - visibleCards);
-
-    loadVisibleImages(targetIndex);
 
     el.scrollBy({
       left: direction === "next" ? scrollAmount : -scrollAmount,
       behavior: "smooth",
     });
+
+    window.setTimeout(updateGalleryControls, 350);
   }
 
   function scrollVideos(direction: "prev" | "next") {
@@ -244,6 +250,8 @@ export function MemoryGallery() {
       left: direction === "next" ? scrollAmount : -scrollAmount,
       behavior: "smooth",
     });
+
+    window.setTimeout(updateVideoControls, 350);
   }
 
   return (
@@ -252,20 +260,22 @@ export function MemoryGallery() {
         <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#f8efd8]/58">
           44 arkivbilder
         </p>
-        <div className="flex gap-2">
+        <div className="hidden gap-2 sm:flex">
           <button
             type="button"
             aria-label="Visa föregående bilder"
+            disabled={!galleryControls.canPrevious}
             onClick={() => scrollGallery("prev")}
-            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10 disabled:cursor-not-allowed disabled:border-[#d8ad62]/12 disabled:text-[#f8efd8]/24 disabled:hover:bg-[#11170f]"
           >
             <ChevronLeft size={20} aria-hidden="true" />
           </button>
           <button
             type="button"
             aria-label="Visa nästa bilder"
+            disabled={!galleryControls.canNext}
             onClick={() => scrollGallery("next")}
-            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10 disabled:cursor-not-allowed disabled:border-[#d8ad62]/12 disabled:text-[#f8efd8]/24 disabled:hover:bg-[#11170f]"
           >
             <ChevronRight size={20} aria-hidden="true" />
           </button>
@@ -275,7 +285,7 @@ export function MemoryGallery() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="gallery-scroll flex snap-x gap-4 overflow-x-auto pb-4"
+        className="gallery-scroll flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4"
       >
         {galleryImages.map((item, index) => (
           <button
@@ -284,21 +294,17 @@ export function MemoryGallery() {
             data-carousel-card
             aria-label={`Visa arkivbild ${String(index + 1).padStart(2, "0")} större`}
             onClick={() => openMedia({ index, type: "image" })}
-            className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
+            className="group w-full shrink-0 cursor-zoom-in snap-start snap-always overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
           >
             <div className="relative aspect-[4/3] bg-[#090806]">
-              {index <= maxLoadedIndex ? (
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  loading="lazy"
-                  sizes="(min-width: 1024px) 410px, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(216,173,98,0.14),transparent_30%),linear-gradient(135deg,rgba(17,23,15,1),rgba(9,8,6,1))]" />
-              )}
+              <Image
+                src={item.src}
+                alt={item.alt}
+                fill
+                loading="lazy"
+                sizes="(min-width: 1024px) 410px, (min-width: 640px) 50vw, 100vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
               <div className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100 group-focus-visible:bg-black/30 group-focus-visible:opacity-100">
                 <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#d8ad62]/60 bg-[#090806]/78 text-[#d8ad62] shadow-2xl shadow-black/40 backdrop-blur">
                   <Search size={24} aria-hidden="true" />
@@ -325,20 +331,22 @@ export function MemoryGallery() {
               Rörligt från tidigare varv.
             </h3>
           </div>
-          <div className="flex gap-2">
+          <div className="hidden gap-2 sm:flex">
             <button
               type="button"
               aria-label="Visa föregående filmklipp"
+              disabled={!videoControls.canPrevious}
               onClick={() => scrollVideos("prev")}
-              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10 disabled:cursor-not-allowed disabled:border-[#d8ad62]/12 disabled:text-[#f8efd8]/24 disabled:hover:bg-[#11170f]"
             >
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
             <button
               type="button"
               aria-label="Visa nästa filmklipp"
+              disabled={!videoControls.canNext}
               onClick={() => scrollVideos("next")}
-              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-[#d8ad62]/30 bg-[#11170f] text-[#d8ad62] transition hover:border-[#d8ad62] hover:bg-[#d8ad62]/10 disabled:cursor-not-allowed disabled:border-[#d8ad62]/12 disabled:text-[#f8efd8]/24 disabled:hover:bg-[#11170f]"
             >
               <ChevronRight size={20} aria-hidden="true" />
             </button>
@@ -347,7 +355,8 @@ export function MemoryGallery() {
 
         <div
           ref={videoScrollRef}
-          className="gallery-scroll flex snap-x gap-4 overflow-x-auto pb-4"
+          onScroll={handleVideoScroll}
+          className="gallery-scroll flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4"
         >
           {archiveVideos.map((item, index) => (
             <button
@@ -356,7 +365,7 @@ export function MemoryGallery() {
               data-carousel-card
               aria-label={`Visa ${item.title.toLowerCase()} större`}
               onClick={() => openMedia({ index, type: "video" })}
-              className="group w-full shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
+              className="group w-full shrink-0 cursor-zoom-in snap-start snap-always overflow-hidden rounded-md border border-[#d8ad62]/24 bg-[#11170f] text-left shadow-2xl shadow-black/30 transition hover:border-[#d8ad62]/70 focus:outline-none focus:ring-2 focus:ring-[#d8ad62] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
             >
               <div className="relative aspect-video bg-[#090806]">
                 <Image
